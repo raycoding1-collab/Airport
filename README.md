@@ -24,7 +24,7 @@ Full engineering rationale, numbers and references: **[DESIGN.md](DESIGN.md)**
 | ![](renders/02_blue_hour.jpg) **Blue hour:** runway pairs, horseshoe taxiways, glowing hub | ![](renders/07_oculus_vortex.jpg) **Oculus:** the log-polar spiral lattice of BIPV and clear "veins" |
 | ![](renders/05_pier_apron.jpg) **Leaf pier:** PV roof with herring-bone skylights, boarding bridges | ![](renders/06_masterplan.jpg) **Master plan:** 4 runways, 5 piers, terraced hills, sponge lake |
 
-Full-resolution JPEGs are in [`renders/`](renders/).
+Full-resolution JPEGs are in [`renders/`](renders/). They were rendered with Cycles at 64 spp plus the OpenImageDenoise denoiser, taking 6–27 minutes per frame on 4 CPU cores, then graded with aerial-perspective haze, bloom and AgX.
 
 ## Key figures
 
@@ -50,7 +50,7 @@ python3 -m http.server 8000
 Then open <http://localhost:8000/web/>. Add `?lite` for low-power GPUs.
 
 **Native:** open `model/qingyun_airport.blend` in **Blender 5.2+**. Every camera in the file (`CAM_*`) is one of
-the renders. Switch the render engine to Cycles. The web export is `web/assets/qingyun.glb` (glTF 2.0, meshopt
+the renders, and the file is already set up for Cycles. The web export is `web/assets/qingyun.glb` (glTF 2.0, meshopt
 compressed).
 
 ## Rebuild everything from source

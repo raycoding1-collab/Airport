@@ -398,9 +398,9 @@ def build_library():
     p2 = g.comb(g.m('MULTIPLY', u, 0.25), g.m('MULTIPLY', v, 0.012), 7.3)
     s2 = g.noise(p2, 2.0, 3, 0.5)
     fac = g.m('ADD', g.m('MULTIPLY', s1.outputs['Fac'], 0.75), g.m('MULTIPLY', s2.outputs['Fac'], 0.35))
-    aer = g.m('MULTIPLY', g.m('SUBTRACT', 1.0, g.m('DIVIDE', g.m('ADD', v, 22.0), 60.0), clamp=True), 0.22)
+    aer = g.m('MULTIPLY', g.m('SUBTRACT', 1.0, g.m('DIVIDE', g.m('ADD', v, 22.0), 60.0), clamp=True), 0.16)
     fac = g.m('ADD', fac, aer)
-    foam = g.ramp(fac, [(0.40, (0, 0, 0)), (0.52, (1, 1, 1))])
+    foam = g.ramp(fac, [(0.60, (0, 0, 0)), (0.70, (1, 1, 1))])
     white = g.mixs(0.45, g.sh('ShaderNodeBsdfTranslucent', Color=(0.85, 0.9, 0.92)),
                    g.sh('ShaderNodeBsdfDiffuse', Color=(0.82, 0.86, 0.88)))
     white = g.adds(white, g.sh('ShaderNodeBsdfGlossy', Color=(0.12, 0.12, 0.12), Roughness=0.15))

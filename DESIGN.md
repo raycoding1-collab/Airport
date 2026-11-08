@@ -78,7 +78,7 @@ access arrives from that single direction and never crosses the airfield.
 * **Primary structure:** 24 radial box ribs ("leaf veins") hang beneath the shell. They run between an oculus
   **compression ring** (3.2 × 2.6 m section) and the perimeter edge beam. The shell rests on 24 **banyan
   tree-columns** in two rings (r = 104 m and r = 184 m), each branching into six arms. This shortens the spans to
-  about 80 m, which is within the range of long-span steel gridshells.
+  about 80–100 m, which is within the range of long-span steel gridshells.
 * **Isolation:** the maglev and metro run directly beneath the Sky Well. As at Daxing, the hub therefore sits on a
   **seismic and vibration isolation layer**. Daxing's terminal uses about 1,124 rubber isolation bearings plus
   sliding bearings and viscous dampers [5].

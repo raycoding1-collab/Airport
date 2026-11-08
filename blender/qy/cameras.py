@@ -1,5 +1,4 @@
 """Camera shots + per-shot lighting presets."""
-import math
 
 import bpy
 from mathutils import Vector
@@ -22,7 +21,7 @@ SHOTS = {
                          haze=(0.25, 0.3, 0.5), haze_k=0.35),
     '03_gorge_gateway': dict(loc=(0.0, -610.0, 6.5), tgt=(0.0, -282.0, 15.0), lens=27.0,
                              light=dict(GOLDEN, az=262.0, el=11.0, sun=5.5), haze=(1.0, 0.75, 0.55), haze_k=0.25),
-    '04_sky_well_interior': dict(loc=(-15.75, -58.6, 13.7), tgt=(0.0, 0.0, 1.5), lens=13.0, exposure=0.0,
+    '04_sky_well_interior': dict(loc=(-15.75, -58.6, 13.7), tgt=(0.0, 0.0, 1.5), lens=13.0, exposure=0.35,
                                  light=dict(az=212.0, el=40.0, sun_color=(1.0, 0.86, 0.70), sun=6.0, sky=0.06,
                                             clouds=0.5, cloud_lit=(13.0, 11.0, 9.0), cloud_shade=(4, 4.4, 5.2),
                                             cloud_cover=(0.55, 0.8), mode='day', aerosol=1.2),

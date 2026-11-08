@@ -52,7 +52,6 @@ def bloom(rgb, threshold=1.6, strength=0.06):
     bright = np.minimum(rgb * k, 60.0)
     H, W = rgb.shape[:2]
     acc = np.zeros_like(rgb)
-    small = bright
     total = 0.0
     for lvl, w in enumerate((1.0, 0.8, 0.6, 0.45, 0.35)):
         f = 2 ** (lvl + 1)

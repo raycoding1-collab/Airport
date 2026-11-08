@@ -297,7 +297,7 @@ fetch('assets/lights.json').then(r => r.json()).then(L => {
   for (const [k, pts] of Object.entries(L)) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pts.flat(), 3));
-    const m = new THREE.PointsMaterial({ color: LIGHT_COL[k] || 0xffffff, size: k.startsWith('taxi') ? 7 : 10, map: spriteTex,
+    const m = new THREE.PointsMaterial({ color: LIGHT_COL[k] || 0xffffff, size: k.startsWith('taxi') ? 14 : 22, map: spriteTex,
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
     m.color.multiplyScalar(4);
     lightGroup.add(new THREE.Points(g, m));
@@ -397,6 +397,7 @@ function setTime(key) {
   if (envRT) envRT.dispose();
   envRT = pmrem.fromScene(envScene, 0.02);
   scene.environment = envRT.texture;
+  scene.environmentIntensity = t.night ? 0.18 : 1.0;
   document.querySelectorAll('#time button').forEach(b => b.classList.toggle('on', b.dataset.t === key));
 }
 
@@ -443,7 +444,10 @@ document.querySelectorAll('#time button').forEach(b => b.onclick = () => setTime
 setTime('golden');
 { const v = VIEWS[0]; camera.position.copy(B(...v.p)); controls.target.copy(B(...v.t)); camera.fov = 2 * Math.atan(18 / v.lens * 9 / 16) / D2R; camera.updateProjectionMatrix(); }
 const params = Q;
-if (params.get('view')) { const v = VIEWS.find(x => x.n.toLowerCase() === params.get('view')); if (v) { goView(v); tween.k = 1; } }
+if (params.get('view')) {
+  const i = VIEWS.findIndex(x => x.n.toLowerCase() === params.get('view'));
+  if (i >= 0) { vb.children[i].click(); tween.k = 1; }
+}
 if (params.get('time')) setTime(params.get('time'));
 
 addEventListener('resize', () => {
