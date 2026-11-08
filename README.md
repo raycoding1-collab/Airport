@@ -40,15 +40,17 @@ Full-resolution JPEGs are in [`renders/`](renders/). They were rendered with Cyc
 
 ## Links
 
-- **Interactive 3D model:** <https://raycoding1-collab.github.io/Airport/> (served by GitHub Pages)
+- **360° photoreal tour:** <https://raycoding1-collab.github.io/Airport/>. Six path-traced 6144 × 3072 panoramas; drag to look around and click the dots to move between views.
+- **Real-time 3D model:** <https://raycoding1-collab.github.io/Airport/web/model.html>. Free orbit with simplified materials and no global illumination.
 - **Renders:** [`renders/`](renders/)
 - **Design document:** [DESIGN.md](DESIGN.md)
 - **Blender source file:** [`model/qingyun_airport.blend`](model/qingyun_airport.blend)
 
 ## Explore the 3D model
 
-**Interactive (browser):** a three.js viewer with the same camera views, golden-hour / midday / blue-hour
-lighting, and animated water.
+**360° tour (browser):** `web/index.html` shows the path-traced panoramas in `web/panos/` (render them with
+`python blender/render.py --shots panos --res 6144x3072 --samples 48`). **Real-time model:** `web/model.html` is a
+three.js viewer with the same camera views, golden-hour / midday / blue-hour lighting, and animated water.
 
 ```bash
 python3 -m http.server 8000

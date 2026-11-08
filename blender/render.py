@@ -132,7 +132,12 @@ def main(argv):
     W, H = (int(v) for v in args.res.split('x'))
     world.render_settings(samples=args.samples, res=(W, H), threshold=args.threshold)
     print('[colour]', sc.view_settings.view_transform, '|', sc.view_settings.look, flush=True)
-    shots = list(cameras.SHOTS) if args.shots == 'all' else args.shots.split(',')
+    if args.shots == 'all':
+        shots = [k for k, v in cameras.SHOTS.items() if not v.get('pano')]
+    elif args.shots == 'panos':
+        shots = list(cameras.PANOS)
+    else:
+        shots = args.shots.split(',')
     os.makedirs(args.out, exist_ok=True)
     tmp = args.tmp or args.out
     for name in shots:

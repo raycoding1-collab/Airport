@@ -41,6 +41,26 @@ SHOTS = {
 }
 
 
+# 360-degree equirectangular panoramas for the web tour (image centre = north)
+INTERIOR = SHOTS['04_sky_well_interior']['light']
+PANOS = {
+    'P1_aerial_golden': dict(loc=(-300.0, -1000.0, 230.0), light=GOLDEN, haze=(0.80, 0.80, 0.90), haze_k=0.9),
+    'P2_sky_well': dict(loc=(-15.75, -58.6, 13.7), light=INTERIOR, exposure=0.35, haze=(1, 1, 1), haze_k=0.0),
+    'P3_gorge': dict(loc=(0.0, -420.0, 9.0), light=dict(GOLDEN, az=262.0, el=11.0, sun=5.5),
+                     haze=(1.0, 0.75, 0.55), haze_k=0.25),
+    'P4_above_oculus': dict(loc=(-55.0, -80.0, 85.0), light=SHOTS['07_oculus_vortex']['light'],
+                            haze=(1.0, 0.8, 0.65), haze_k=0.3),
+    'P5_apron': dict(loc=(-110.0, 330.0, 12.0), light=dict(GOLDEN, az=258.0, el=9.0, sun=6.0),
+                     haze=(1.0, 0.74, 0.55), haze_k=0.35),
+    'P6_blue_hour': dict(loc=(700.0, 500.0, 300.0), light=SHOTS['02_blue_hour']['light'],
+                         haze=(0.25, 0.3, 0.5), haze_k=0.35),
+}
+for _k, _v in PANOS.items():
+    _v['pano'] = True
+    _v['vignette'] = 0.0
+SHOTS.update(PANOS)
+
+
 def build_cameras():
     sc = bpy.context.scene
     for name, s in SHOTS.items():
@@ -54,6 +74,13 @@ def build_cameras():
 def _pose(ob, s):
     cd = ob.data
     ob.location = s['loc']
+    if s.get('pano'):
+        cd.type = 'PANO'
+        cd.panorama_type = 'EQUIRECTANGULAR'
+        cd.clip_start = 0.3
+        cd.clip_end = 40000.0
+        ob.rotation_euler = (1.5707963267948966, 0.0, 0.0)   # level, facing north
+        return
     d = Vector(s['tgt']) - Vector(s['loc'])
     if d.length < 1e-6:
         d = Vector((0, 0, -1))
@@ -75,7 +102,10 @@ def _pose(ob, s):
 def apply_shot(name):
     s = SHOTS[name]
     sc = bpy.context.scene
-    ob = bpy.data.objects['CAM_' + name]
+    ob = bpy.data.objects.get('CAM_' + name)
+    if ob is None:                       # e.g. panoramas added after the .blend was built
+        ob = bpy.data.objects.new('CAM_' + name, bpy.data.cameras.new('CAM_' + name))
+        sc.collection.objects.link(ob)
     _pose(ob, s)
     sc.camera = ob
     L = s['light']

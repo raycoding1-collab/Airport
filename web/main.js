@@ -140,7 +140,7 @@ function pv(extra) {
 }
 function glass(opacity = 0.2, tint = [0.8, 0.9, 0.9]) {
   const m = new THREE.MeshPhysicalMaterial({ color: lin(...tint), metalness: 0, roughness: 0.04, transparent: true,
-    opacity, envMapIntensity: 1.6, depthWrite: false, side: THREE.DoubleSide });
+    opacity, envMapIntensity: 0.9, depthWrite: false, side: THREE.DoubleSide });
   m.onBeforeCompile = s => {
     s.uniforms.uNight = night.u;
     s.fragmentShader = 'uniform float uNight;\n' + s.fragmentShader.replace('#include <emissivemap_fragment>',
@@ -157,7 +157,13 @@ function facade() {
     s.uniforms.uNight = night.u;
     s.fragmentShader = 'uniform float uNight;\n' + s.fragmentShader.replace('#include <emissivemap_fragment>',
       `#include <emissivemap_fragment>
-       float mull = max(step(fract(vUv.x / 3.0), 0.045), step(fract(vUv.y / 4.5), 0.035));
+       vec2 g = vec2(vUv.x / 3.0, (1.0 - vUv.y) / 4.5);
+       vec2 w = fwidth(g);
+       vec2 f = fract(g);
+       vec2 line = vec2(0.045, 0.035);
+       vec2 m2 = 1.0 - smoothstep(line, line + w, f);
+       float mull = max(m2.x, m2.y);
+       mull = mix(mull, 0.12, smoothstep(0.05, 0.25, max(w.x, w.y)));   // far away: average, no moire
        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.03), mull);
        diffuseColor.a = mix(mix(diffuseColor.a, 0.82, uNight), 1.0, mull);
        totalEmissiveRadiance += vec3(1.0, 0.74, 0.48) * (1.0 - mull) * uNight * 1.6;`);
@@ -210,7 +216,7 @@ function soffit() {
 
 const MAT = {
   pv_bipv: () => pv(false), pv_pier: () => pv(true), pv_field: () => pv(false),
-  glass_clear: () => glass(0.16), glass_lowiron: () => glass(0.14, [0.9, 0.96, 0.95]), glass_facade: facade,
+  glass_clear: () => glass(0.1), glass_lowiron: () => glass(0.07, [0.9, 0.96, 0.95]), glass_facade: facade,
   glass_dark: () => new THREE.MeshPhysicalMaterial({ color: 0x0b0f12, roughness: 0.06, clearcoat: 1, envMapIntensity: 1.3 }),
   steel_white: () => std([0.84, 0.84, 0.82], 0.32), bronze_caps: () => std([0.80, 0.73, 0.62], 0.26, 0.65),
   champagne: () => std([0.80, 0.66, 0.47], 0.24, 1), aluminium: () => std([0.78, 0.79, 0.80], 0.3, 1),
@@ -321,6 +327,12 @@ gl.load('assets/qingyun.glb', async gltf => {
       o.material = Array.isArray(o.material) ? nm : nm[0];
       const n = (o.name + (o.parent ? o.parent.name : ''));
       const noShadow = /Water|Lake|Rills|Cascade|Curtain|Waterfall|Splash|Grass|Apron|Marking|Runway|Taxiway|Glass|Balustrade/.test(n);
+      if (/Balustrade/.test(n)) o.visible = false;              // frameless glass: avoid a milky band across the view
+      if (/SkyWell_Cascades|Terrace_Cascades/.test(n)) {
+        const m = o.material.clone(); m.alphaMap = o.material.alphaMap.clone(); m.alphaMap.needsUpdate = true;
+        m.alphaMap.repeat.set(0.8, 0.35); m.opacity = 0.45; o.material = m;
+        animated.push(dt => { m.alphaMap.offset.y -= dt * 0.5; });
+      }
       o.castShadow = !noShadow;
       o.receiveShadow = true;
       if (/Apron_Concrete/.test(n)) {      // planar UVs for the apron mask
@@ -397,7 +409,7 @@ function setTime(key) {
   if (envRT) envRT.dispose();
   envRT = pmrem.fromScene(envScene, 0.02);
   scene.environment = envRT.texture;
-  scene.environmentIntensity = t.night ? 0.18 : 1.0;
+  scene.environmentIntensity = t.night ? 0.18 : 0.75;
   document.querySelectorAll('#time button').forEach(b => b.classList.toggle('on', b.dataset.t === key));
 }
 

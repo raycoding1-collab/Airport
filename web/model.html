@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qingyun Shanshui International Airport — real-time 3D model</title>
+<style>
+  :root { --ink:#0d1418; --glass:rgba(12,20,24,.58); --line:rgba(255,255,255,.14); --txt:#eef3f1; --mute:#a9b8b4; --jade:#3fc1a6; }
+  html,body { margin:0; height:100%; background:#000; color:var(--txt); font:14px/1.45 "Inter","Helvetica Neue",Arial,sans-serif; overflow:hidden; }
+  canvas { display:block; }
+  .panel { position:absolute; background:var(--glass); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+           border:1px solid var(--line); border-radius:14px; }
+  #title { top:18px; left:18px; padding:14px 18px; max-width:380px; }
+  #title h1 { margin:0; font-size:19px; font-weight:600; letter-spacing:.02em; }
+  #title h1 span { color:var(--jade); font-weight:500; margin-right:6px; }
+  #title p { margin:6px 0 0; color:var(--mute); font-size:12.5px; }
+  #views { left:50%; transform:translateX(-50%); bottom:18px; padding:8px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:92vw; }
+  #time { top:18px; right:18px; padding:8px; display:flex; gap:6px; }
+  button { background:transparent; color:var(--txt); border:1px solid var(--line); border-radius:9px; padding:7px 11px;
+           font:inherit; font-size:12.5px; cursor:pointer; transition:background .2s,border-color .2s; }
+  button:hover, a.btn:hover { background:rgba(255,255,255,.08); }
+  a.btn { color:var(--txt); border:1px solid var(--line); border-radius:9px; padding:7px 11px; font-size:12.5px; text-decoration:none; }
+  button.on { border-color:var(--jade); background:rgba(63,193,166,.16); }
+  #info { right:18px; bottom:84px; width:330px; padding:14px 16px; display:none; font-size:12.8px; }
+  #info h3 { margin:0 0 6px; font-size:14px; color:var(--jade); font-weight:600; }
+  #info p { margin:0; color:#d6e1de; }
+  #load { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+          background:radial-gradient(ellipse at center,#16242a 0,#05090b 70%); z-index:9; transition:opacity .8s; }
+  #bar { width:260px; height:3px; background:rgba(255,255,255,.12); border-radius:2px; overflow:hidden; }
+  #bar i { display:block; height:100%; width:0; background:var(--jade); transition:width .2s; }
+  #hint { position:absolute; left:18px; bottom:22px; color:var(--mute); font-size:11.5px; }
+  @media (max-width:760px){ #title{max-width:62vw} #info{left:18px;right:18px;width:auto} #hint{display:none} }
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/build/three.module.js",
+               "three/addons/": "./vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="load"><div style="letter-spacing:.3em;color:#a9b8b4;font-size:12px">QINGYUN · 青云</div><div id="bar"><i></i></div><div id="lt" style="color:#6f817c;font-size:11px">loading model…</div></div>
+<div id="title" class="panel">
+  <h1><span>青云</span>Qingyun Shanshui International Airport</h1>
+  <p>Real-time model (simplified materials, no global illumination). For render quality open the <a href="index.html" style="color:#3fc1a6">360° photoreal tour</a>.</p>
+</div>
+<div id="time" class="panel">
+  <button data-t="golden" class="on">Golden hour</button>
+  <button data-t="day">Midday</button>
+  <button data-t="night">Blue hour</button>
+  <a class="btn" href="index.html" title="Photoreal path-traced 360° panoramas">360° photoreal tour</a>
+</div>
+<div id="views" class="panel"></div>
+<div id="info" class="panel"><h3></h3><p></p></div>
+<div id="hint">drag to orbit · right-drag to pan · scroll to zoom</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

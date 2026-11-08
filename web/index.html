@@ -2,53 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Qingyun Shanshui International Airport — interactive model</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Qingyun Shanshui International Airport — 360° path-traced tour</title>
+<meta name="description" content="Concept airport: an inverted-lotus solar gridshell that drains the sky into a 58 m chilled vortex waterfall. Photoreal 360° tour rendered with Cycles.">
 <style>
-  :root { --ink:#0d1418; --glass:rgba(12,20,24,.58); --line:rgba(255,255,255,.14); --txt:#eef3f1; --mute:#a9b8b4; --jade:#3fc1a6; }
+  :root { --glass:rgba(10,16,19,.55); --line:rgba(255,255,255,.14); --txt:#eef3f1; --mute:#a9b8b4; --jade:#3fc1a6; }
   html,body { margin:0; height:100%; background:#000; color:var(--txt); font:14px/1.45 "Inter","Helvetica Neue",Arial,sans-serif; overflow:hidden; }
-  canvas { display:block; }
+  canvas { display:block; touch-action:none; cursor:grab; }
+  canvas:active { cursor:grabbing; }
   .panel { position:absolute; background:var(--glass); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
            border:1px solid var(--line); border-radius:14px; }
-  #title { top:18px; left:18px; padding:14px 18px; max-width:380px; }
+  #title { top:18px; left:18px; padding:14px 18px; max-width:400px; }
   #title h1 { margin:0; font-size:19px; font-weight:600; letter-spacing:.02em; }
   #title h1 span { color:var(--jade); font-weight:500; margin-right:6px; }
   #title p { margin:6px 0 0; color:var(--mute); font-size:12.5px; }
-  #views { left:50%; transform:translateX(-50%); bottom:18px; padding:8px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:92vw; }
-  #time { top:18px; right:18px; padding:8px; display:flex; gap:6px; }
-  button { background:transparent; color:var(--txt); border:1px solid var(--line); border-radius:9px; padding:7px 11px;
-           font:inherit; font-size:12.5px; cursor:pointer; transition:background .2s,border-color .2s; }
-  button:hover { background:rgba(255,255,255,.08); }
+  .badge { display:inline-block; margin-top:8px; font-size:11px; color:var(--jade); border:1px solid rgba(63,193,166,.45); border-radius:20px; padding:2px 9px; }
+  #scenes { left:50%; transform:translateX(-50%); bottom:18px; padding:8px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:94vw; }
+  #tools { top:18px; right:18px; padding:8px; display:flex; gap:6px; }
+  button, a.btn { background:transparent; color:var(--txt); border:1px solid var(--line); border-radius:9px; padding:7px 11px;
+           font:inherit; font-size:12.5px; cursor:pointer; text-decoration:none; transition:background .2s,border-color .2s; white-space:nowrap; }
+  button:hover, a.btn:hover { background:rgba(255,255,255,.08); }
   button.on { border-color:var(--jade); background:rgba(63,193,166,.16); }
-  #info { right:18px; bottom:84px; width:330px; padding:14px 16px; display:none; font-size:12.8px; }
+  #info { right:18px; bottom:86px; width:340px; padding:14px 16px; font-size:12.8px; }
   #info h3 { margin:0 0 6px; font-size:14px; color:var(--jade); font-weight:600; }
   #info p { margin:0; color:#d6e1de; }
-  #load { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px;
-          background:radial-gradient(ellipse at center,#16242a 0,#05090b 70%); z-index:9; transition:opacity .8s; }
-  #bar { width:260px; height:3px; background:rgba(255,255,255,.12); border-radius:2px; overflow:hidden; }
-  #bar i { display:block; height:100%; width:0; background:var(--jade); transition:width .2s; }
-  #hint { position:absolute; left:18px; bottom:22px; color:var(--mute); font-size:11.5px; }
-  @media (max-width:760px){ #title{max-width:62vw} #info{left:18px;right:18px;width:auto} #hint{display:none} }
+  #info .close { position:absolute; top:6px; right:8px; border:none; padding:2px 6px; color:var(--mute); }
+  .hot { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .hot i { width:18px; height:18px; border-radius:50%; border:2px solid #fff; background:rgba(63,193,166,.55); box-shadow:0 0 0 6px rgba(63,193,166,.18), 0 0 18px rgba(0,0,0,.5);
+           animation:pulse 2.4s infinite; }
+  .hot span { font-size:11.5px; background:rgba(8,12,14,.7); border:1px solid var(--line); padding:3px 8px; border-radius:8px; white-space:nowrap; opacity:.0; transition:opacity .2s; }
+  .hot:hover span { opacity:1; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,193,166,.45)} 70%{box-shadow:0 0 0 14px rgba(63,193,166,0)} 100%{box-shadow:0 0 0 0 rgba(63,193,166,0)} }
+  #hots { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  #load { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:var(--mute); font-size:12px; letter-spacing:.2em; pointer-events:none; transition:opacity .6s; }
+  #gallery { position:absolute; inset:0; background:rgba(4,7,9,.94); display:none; overflow:auto; z-index:20; padding:70px 4vw 40px; box-sizing:border-box; }
+  #gallery h2 { margin:0 0 6px; font-weight:600; font-size:20px; }
+  #gallery .sub { color:var(--mute); margin:0 0 22px; font-size:13px; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:16px; }
+  #grid figure { margin:0; cursor:zoom-in; }
+  #grid img { width:100%; border-radius:10px; display:block; border:1px solid var(--line); }
+  #grid figcaption { font-size:12.5px; color:var(--mute); margin-top:6px; }
+  #gclose { position:fixed; top:18px; right:18px; z-index:21; }
+  #lb { position:absolute; inset:0; background:#000; display:none; z-index:30; overflow:auto; cursor:zoom-in; }
+  #lb img { display:block; max-width:100vw; max-height:100vh; margin:auto; position:absolute; inset:0; }
+  #lb.zoom { cursor:zoom-out; }
+  #lb.zoom img { max-width:none; max-height:none; position:static; }
+  #lbbar { position:fixed; top:14px; right:14px; z-index:31; display:none; gap:6px; }
+  #hint { position:absolute; left:18px; bottom:24px; color:var(--mute); font-size:11.5px; }
+  @media (max-width:760px){ #title{max-width:64vw;padding:10px 12px} #title p{display:none} #info{left:12px;right:12px;width:auto;bottom:120px} #hint{display:none} #grid{grid-template-columns:1fr} }
 </style>
 <script type="importmap">
-{ "imports": { "three": "./vendor/three/build/three.module.js",
-               "three/addons/": "./vendor/three/examples/jsm/" } }
+{ "imports": { "three": "./vendor/three/build/three.module.js" } }
 </script>
 </head>
 <body>
-<div id="load"><div style="letter-spacing:.3em;color:#a9b8b4;font-size:12px">QINGYUN · 青云</div><div id="bar"><i></i></div><div id="lt" style="color:#6f817c;font-size:11px">loading model…</div></div>
+<div id="hots"></div>
+<div id="load">LOADING · 360°</div>
 <div id="title" class="panel">
   <h1><span>青云</span>Qingyun Shanshui International Airport</h1>
-  <p>A concept “sponge airport”: an inverted-lotus solar gridshell that drains the sky into a 58 m chilled vortex waterfall, terraced wetland hills, a lake of floating PV, maglev beneath the Sky Well.</p>
+  <p>A concept “sponge airport”: an inverted-lotus solar gridshell drains the sky into a 58 m chilled vortex waterfall above the maglev station.</p>
+  <div class="badge">360° · path-traced in Cycles</div>
 </div>
-<div id="time" class="panel">
-  <button data-t="golden" class="on">Golden hour</button>
-  <button data-t="day">Midday</button>
-  <button data-t="night">Blue hour</button>
+<div id="tools" class="panel">
+  <button id="gbtn">4K renders</button>
+  <a class="btn" href="model.html" title="Interactive real-time model (simplified materials)">3D model</a>
+  <a class="btn" href="https://github.com/raycoding1-collab/Airport/blob/claude/elegant-faraday-hr7zlb/DESIGN.md" target="_blank" rel="noopener">Design</a>
 </div>
-<div id="views" class="panel"></div>
-<div id="info" class="panel"><h3></h3><p></p></div>
-<div id="hint">drag to orbit · right-drag to pan · scroll to zoom</div>
-<script type="module" src="./main.js"></script>
+<div id="scenes" class="panel"></div>
+<div id="info" class="panel"><button class="close" title="hide">×</button><h3></h3><p></p></div>
+<div id="hint">drag to look around · scroll / pinch to zoom · click the dots to move</div>
+<div id="gallery">
+  <button id="gclose">✕ Close</button>
+  <h2>4K renders</h2>
+  <p class="sub">3840 × 2160, path-traced (Cycles, 64 spp + OpenImageDenoise), graded with aerial-perspective haze and AgX. Click to view full size.</p>
+  <div id="grid"></div>
+</div>
+<div id="lb"><img alt=""></div>
+<div id="lbbar"><a class="btn" id="lbfull" target="_blank" rel="noopener">Open original</a><button id="lbclose">✕</button></div>
+<script type="module" src="./tour.js"></script>
 </body>
 </html>

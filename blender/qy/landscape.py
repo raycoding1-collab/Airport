@@ -170,7 +170,7 @@ def build_gorge(root, M):
 
     road.build('Gorge_Roads', coll, [M['asphalt']])
     mk.build('Gorge_RoadMarks', coll, [M['paint_white']])
-    water.build('Gorge_Water', coll, [M['water_clear']])
+    water.build('Gorge_Water', coll, [M['water_lake']])
     paths.build('Gorge_Paths', coll, [M['path']])
     banks.build('Gorge_Banks', coll, [M['planting']])
 
