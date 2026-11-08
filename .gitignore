@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.blend1
+*.exr
+renders/*.png
+*.tmp.glb
+node_modules/
