@@ -38,6 +38,13 @@ Full-resolution JPEGs are in [`renders/`](renders/). They were rendered with Cyc
 | Water | ≈ 460,000 m³/yr captured from the roofs; 1.33 km² sponge lake, ≈ 2 million m³ of live storage |
 | Rail | Maglev / high-speed rail at B2 directly beneath the vortex |
 
+## Links
+
+- **Interactive 3D model:** <https://raycoding1-collab.github.io/Airport/> (served by GitHub Pages)
+- **Renders:** [`renders/`](renders/)
+- **Design document:** [DESIGN.md](DESIGN.md)
+- **Blender source file:** [`model/qingyun_airport.blend`](model/qingyun_airport.blend)
+
 ## Explore the 3D model
 
 **Interactive (browser):** a three.js viewer with the same camera views, golden-hour / midday / blue-hour
