@@ -88,28 +88,44 @@ function loadTex(url) {
 
 // ---------------------------------------------------------------------------
 // view control (yaw / pitch with inertia, fov zoom)
-let yaw = 0, pitch = 0, vYaw = 0, vPitch = 0, idle = 0, dragging = false, lx = 0, ly = 0;
+// "Grab the picture" feel: dragging across the full screen height turns the view by exactly
+// one vertical field of view, so the scene stays under the finger. Release keeps a gentle,
+// capped glide that stops in under a second.
+let yaw = 0, pitch = 0, vYaw = 0, vPitch = 0, idle = 0, dragging = false, lx = 0, ly = 0, lastT = 0, rebase = false;
+const MAX_SPIN = 1.2;                       // rad/s cap on the release glide
 const el = renderer.domElement;
 const pointers = new Map();
 let pinch0 = 0, fov0 = camera.fov;
 el.addEventListener('pointerdown', e => {
   el.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
-  dragging = true; lx = e.clientX; ly = e.clientY; vYaw = vPitch = 0; idle = 0;
+  dragging = true; lx = e.clientX; ly = e.clientY; lastT = performance.now(); vYaw = vPitch = 0; idle = 0;
   if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); fov0 = camera.fov; }
 });
 el.addEventListener('pointermove', e => {
   if (!pointers.has(e.pointerId)) return;
   pointers.set(e.pointerId, [e.clientX, e.clientY]);
-  if (pointers.size === 2) {
+  idle = 0;
+  if (pointers.size >= 2) {                 // pinch zoom only, never rotate with two fingers
     const [a, b] = [...pointers.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-    camera.fov = THREE.MathUtils.clamp(fov0 * pinch0 / d, 25, 95); camera.updateProjectionMatrix(); return;
+    camera.fov = THREE.MathUtils.clamp(fov0 * pinch0 / Math.max(d, 1), 25, 95); camera.updateProjectionMatrix();
+    vYaw = vPitch = 0; rebase = true; return;
   }
-  const k = camera.fov / innerHeight;
+  if (rebase) { lx = e.clientX; ly = e.clientY; lastT = performance.now(); rebase = false; return; }
+  const k = camera.fov * D2R / innerHeight;   // radians per pixel (fov is in degrees)
   const dx = (e.clientX - lx) * k, dy = (e.clientY - ly) * k;
   lx = e.clientX; ly = e.clientY;
-  yaw -= dx; pitch += dy; vYaw = -dx * 30; vPitch = dy * 30; idle = 0;
+  const now = performance.now(), dt = Math.max(8, now - lastT) / 1000; lastT = now;
+  yaw -= dx; pitch += dy;
+  vYaw = 0.75 * vYaw + 0.25 * (-dx / dt); vPitch = 0.75 * vPitch + 0.25 * (dy / dt);
 });
-const up = e => { pointers.delete(e.pointerId); if (!pointers.size) dragging = false; };
+const up = e => {
+  pointers.delete(e.pointerId);
+  if (pointers.size) { rebase = true; return; }   // lifting one finger of a pinch: no jump
+  dragging = false;
+  if (performance.now() - lastT > 70) vYaw = vPitch = 0;   // finger rested before lifting: no glide
+  vYaw = THREE.MathUtils.clamp(vYaw, -MAX_SPIN, MAX_SPIN);
+  vPitch = THREE.MathUtils.clamp(vPitch, -MAX_SPIN, MAX_SPIN);
+};
 el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
 el.addEventListener('wheel', e => {
   e.preventDefault(); idle = 0;
@@ -122,7 +138,9 @@ const sceneBar = document.getElementById('scenes');
 const info = document.getElementById('info');
 const hots = document.getElementById('hots');
 const load = document.getElementById('load');
-info.querySelector('.close').onclick = () => (info.style.display = 'none');
+let infoWanted = innerWidth > 760;           // phones: description starts hidden, ⓘ shows it
+info.querySelector('.close').onclick = () => { infoWanted = false; info.style.display = 'none'; };
+document.getElementById('ibtn').onclick = () => { infoWanted = info.style.display === 'none'; info.style.display = infoWanted ? 'block' : 'none'; };
 let cur = null, sphere = null, token = 0;
 
 SCENES.forEach((s, i) => {
@@ -135,7 +153,7 @@ async function go(i, instant = false) {
   const s = SCENES[i];
   const my = ++token;
   SCENES.forEach(x => x.btn.classList.toggle('on', x === s));
-  info.style.display = 'block';
+  info.style.display = infoWanted ? 'block' : 'none';
   info.querySelector('h3').textContent = s.h;
   info.querySelector('p').textContent = s.d;
   history.replaceState(null, '', '?scene=' + s.id.slice(0, 2).toLowerCase());
@@ -230,6 +248,7 @@ Promise.all(SCENES.map(s => fetch(`panos/${s.id}_2k.jpg`, { method: 'HEAD' }).th
   });
 if (q.has('gallery')) gal.style.display = 'block';
 
+window.__view = () => ({ yaw: yaw / D2R, pitch: pitch / D2R, fov: camera.fov });
 const clock = new THREE.Clock();
 const look = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
@@ -237,7 +256,7 @@ renderer.setAnimationLoop(() => {
   idle += dt;
   if (!dragging) {
     yaw += vYaw * dt; pitch += vPitch * dt;
-    vYaw *= Math.pow(0.04, dt); vPitch *= Math.pow(0.04, dt);
+    vYaw *= Math.pow(0.02, dt); vPitch *= Math.pow(0.02, dt);
     if (idle > 6 && !q.has('still')) yaw += 0.025 * dt * Math.min(1, (idle - 6) / 3);   // gentle auto-pan
   }
   pitch = THREE.MathUtils.clamp(pitch, -88 * D2R, 88 * D2R);

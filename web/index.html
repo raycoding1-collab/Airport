@@ -49,7 +49,11 @@
   #lb.zoom img { max-width:none; max-height:none; position:static; }
   #lbbar { position:fixed; top:14px; right:14px; z-index:31; display:none; gap:6px; }
   #hint { position:absolute; left:18px; bottom:24px; color:var(--mute); font-size:11.5px; }
-  @media (max-width:760px){ #title{max-width:64vw;padding:10px 12px} #title p{display:none} #info{left:12px;right:12px;width:auto;bottom:120px} #hint{display:none} #grid{grid-template-columns:1fr} }
+  @media (max-width:760px){ #title{max-width:calc(100vw - 36px);padding:10px 12px;top:12px;left:12px} #title h1{font-size:15px} #title p{display:none} #title .badge{margin-top:4px}
+    #tools{top:auto;bottom:64px;right:8px;padding:5px;gap:5px} #tools button,#tools a.btn{padding:6px 9px;font-size:12px}
+    #scenes{left:8px;right:8px;bottom:8px;transform:none;max-width:none;padding:5px;gap:5px;flex-wrap:nowrap;
+            justify-content:flex-start;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    #scenes::-webkit-scrollbar{display:none} #scenes button{padding:7px 10px;font-size:12.5px;flex:0 0 auto} #info{left:12px;right:12px;width:auto;bottom:120px} #hint{display:none} #grid{grid-template-columns:1fr} }
 </style>
 <script type="importmap">
 { "imports": { "three": "./vendor/three/build/three.module.js" } }
@@ -64,6 +68,7 @@
   <div class="badge">360° · path-traced in Cycles</div>
 </div>
 <div id="tools" class="panel">
+  <button id="ibtn" title="About this view">ⓘ</button>
   <button id="gbtn">4K renders</button>
   <a class="btn" href="model.html" title="Interactive real-time model (simplified materials)">3D model</a>
   <a class="btn" href="https://github.com/raycoding1-collab/Airport/blob/claude/elegant-faraday-hr7zlb/DESIGN.md" target="_blank" rel="noopener">Design</a>
